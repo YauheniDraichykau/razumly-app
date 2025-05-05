@@ -2,6 +2,7 @@
   "name": "razumly-app",
   "version": "0.1.0",
   "private": true,
+  "author": "YauheniDraichykau",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,6 +11,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@auth/core": "^0.39.0",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -47,6 +49,7 @@
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "next": "15.2.4",
+    "next-auth": "^4.24.11",
     "next-themes": "^0.4.4",
     "react": "^19",
     "react-day-picker": "8.10.1",
