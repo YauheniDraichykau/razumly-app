@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
   SidebarTrigger,
 } from '@core/ui';
+import { signOut } from 'next-auth/react';
 
 export const DashboardHeader = () => {
   return (
@@ -66,9 +67,14 @@ export const DashboardHeader = () => {
               <DropdownMenuItem>Billing</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Link href="/" className="flex w-full">
+                <Button
+                  variant="text"
+                  size="text"
+                  className="w-full flex justify-start"
+                  onClick={() => signOut()}
+                >
                   Sign out
-                </Link>
+                </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
