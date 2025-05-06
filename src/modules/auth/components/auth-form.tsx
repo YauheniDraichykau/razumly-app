@@ -1,11 +1,12 @@
 'use client';
 
 import type React from 'react';
-
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import type { z } from 'zod';
 import {
   Button,
   Input,
@@ -17,36 +18,65 @@ import {
   CardTitle,
 } from '@core/ui';
 import { SocialButton } from '@auth/components/social-button';
+import { loginCredentials, registerUser } from '@core/lib/auth';
+import { signinSchema, signupSchema } from '@auth/validators';
+import { FieldErrors, FieldValues, useForm } from 'react-hook-form';
+import { useToast } from '@core/hooks/use-toast';
 
 interface AuthFormProps {
   initialAuthMode?: 'signin' | 'signup';
 }
 
+type SignUpForm = z.infer<typeof signupSchema>;
+type SignInForm = z.infer<typeof signinSchema>;
+
 export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
-  const router = useRouter();
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>(initialAuthMode);
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+    setError,
+    reset,
+  } = useForm<SignUpForm | SignInForm>({
+    resolver: zodResolver(authMode === 'signup' ? signupSchema : signinSchema),
+    defaultValues: { email: '', password: '', name: '' } as any,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const onSubmit = async (values: FieldValues) => {
+    try {
+      if (authMode === 'signup') {
+        await registerUser(values as SignUpForm);
+      }
+      await loginCredentials(values.email, values.password, '/dashboard');
+
+      router.push('/dashboard');
+    } catch (e: any) {
+      toast({
+        title: 'Error',
+        description: e.message ?? 'Authentication failed',
+        variantStyle: 'error',
+      });
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const onErrors = (errors: FieldErrors) => {
+    if (Object.keys(errors).length > 0) {
+      Object.keys(errors).forEach((error) => {
+        const errorMessage =
+          typeof errors[error]?.message === 'string' ? errors[error]?.message : 'An error occurred';
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      router.push('/dashboard');
-    }, 1500);
+        toast({
+          title: 'Error',
+          description: errorMessage,
+          variantStyle: 'error',
+        });
+      });
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -55,6 +85,7 @@ export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
 
   const toggleAuthMode = () => {
     setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
+    reset();
   };
 
   return (
@@ -76,7 +107,6 @@ export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
         </CardHeader>
         <CardContent>
           <div className="grid gap-6">
-            {/* Social Sign In */}
             <div className="grid grid-cols-1 gap-3">
               <SocialButton provider="google" />
             </div>
@@ -90,8 +120,7 @@ export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
               </div>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit, onErrors)} className="space-y-4">
               <AnimatePresence mode="wait">
                 {authMode === 'signup' && (
                   <motion.div
@@ -105,12 +134,9 @@ export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
                     <Label htmlFor="name">Name</Label>
                     <Input
                       id="name"
-                      name="name"
                       placeholder="John Doe"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required={authMode === 'signup'}
-                      disabled={isLoading}
+                      {...register('name')}
+                      disabled={isSubmitting}
                     />
                   </motion.div>
                 )}
@@ -120,20 +146,17 @@ export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  name="email"
                   type="email"
+                  {...register('email')}
                   placeholder="hello@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  {authMode === 'signin' && (
+                  {/* {authMode === 'signin' && (
                     <button
                       type="button"
                       onClick={() => {}}
@@ -141,18 +164,15 @@ export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
                     >
                       Forgot password?
                     </button>
-                  )}
+                  )} */}
                 </div>
                 <div className="relative">
                   <Input
-                    id="password"
-                    name="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    disabled={isLoading}
+                    id="password"
+                    {...register('password')}
+                    disabled={isSubmitting}
                     className="pr-10"
                   />
                   <button
@@ -169,9 +189,9 @@ export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
                 <Button
                   type="submit"
                   className="w-full bg-primary hover:bg-primary-hover"
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                 >
-                  {isLoading ? (
+                  {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       {authMode === 'signin' ? 'Signing in...' : 'Creating account...'}
