@@ -37,13 +37,13 @@ export default async function LandingPage() {
           </nav>
           <div className="flex items-center gap-4">
             {!session && (
-              <Link href="/auth/login">
+              <Link href="/auth">
                 <Button variant="outline" className="hidden md:inline-flex">
                   Sign In
                 </Button>
               </Link>
             )}
-            <Link href="/dashboard">
+            <Link href="/app/dashboard">
               <Button className="bg-primary hover:bg-primary-hover">Get Started</Button>
             </Link>
           </div>
@@ -62,7 +62,7 @@ export default async function LandingPage() {
                 them into simple, human-friendly language.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link href="/dashboard">
+                <Link href="/app/dashboard">
                   <Button size="lg" className="bg-primary hover:bg-primary-hover w-full sm:w-auto">
                     Simplify Your Documents Now
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -160,7 +160,7 @@ export default async function LandingPage() {
                 </div>
               </div>
               <div className="mt-12 text-center">
-                <Link href="/dashboard">
+                <Link href="/app/dashboard">
                   <Button size="lg" className="bg-primary hover:bg-primary-hover">
                     Try It Now
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -193,7 +193,7 @@ export default async function LandingPage() {
               <p className="mb-8 text-lg text-white/90">
                 Join thousands of users who are understanding complex documents with ease.
               </p>
-              <Link href="/dashboard">
+              <Link href="/app/dashboard">
                 <Button
                   size="lg"
                   variant="secondary"

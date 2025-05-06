@@ -14,7 +14,7 @@ export const registerUser = async (data: { name: string; email: string; password
 export const loginCredentials = async (
   email: string,
   password: string,
-  callback = '/dashboard',
+  callback = '/app/dashboard',
 ) => {
   const { signIn } = await import('next-auth/react');
 

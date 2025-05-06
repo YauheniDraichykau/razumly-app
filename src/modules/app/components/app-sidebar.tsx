@@ -33,32 +33,32 @@ export const DashboardSidebar = () => {
       <SidebarContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive('/dashboard')}>
-              <Link href="/dashboard">
+            <SidebarMenuButton asChild isActive={isActive('/app/dashboard')}>
+              <Link href="/app/dashboard">
                 <Home className="h-5 w-5" />
                 <span>Dashboard</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive('/dashboard/history')}>
-              <Link href="/dashboard/history">
+            <SidebarMenuButton asChild isActive={isActive('/app/history')}>
+              <Link href="/app/history">
                 <History className="h-5 w-5" />
                 <span>History</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive('/dashboard/settings')}>
-              <Link href="/dashboard/settings">
+            <SidebarMenuButton asChild isActive={isActive('/app/settings')}>
+              <Link href="/app/settings">
                 <Settings className="h-5 w-5" />
                 <span>Settings</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={isActive('/dashboard/help')}>
-              <Link href="/dashboard/help">
+            <SidebarMenuButton asChild isActive={isActive('/app/help')}>
+              <Link href="/app/help">
                 <HelpCircle className="h-5 w-5" />
                 <span>Help & Support</span>
               </Link>

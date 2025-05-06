@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: '/auth/login',
+    signIn: '/auth',
   },
   callbacks: {
     async signIn({ account }) {
@@ -82,11 +82,8 @@ export const authOptions: NextAuthOptions = {
       return { ...session, accessToken: token.accessToken };
     },
     async redirect({ url, baseUrl }) {
-      if (
-        url.startsWith(`${baseUrl}/api/auth/callback`) ||
-        url.startsWith(`${baseUrl}/auth/login`)
-      ) {
-        return `/dashboard`;
+      if (url.startsWith(`${baseUrl}/api/auth/callback`) || url.startsWith(`${baseUrl}/auth`)) {
+        return `/app/dashboard`;
       }
 
       return url.startsWith('/') ? url : baseUrl;

@@ -47,8 +47,13 @@ Custom tokens are defined in `core/styles/global.css` and connected via Tailwind
 ```
 src/
 ├── app/
-│   └── (landing)/
-│   └── dashboard/
+│   └── (marketing)/
+│   └── app/
+│       └── dashboard/
+│       └── history/
+│       ...
+│   └── auth/page.tsx
+│   └── api/auth/[...nextauth]/route.ts
 ├── core/
 │   └── styles/
 │       └── theme.css
@@ -57,8 +62,9 @@ src/
 │   └── lib/
 │       ...
 ├── modules/
-│   └── landing/
-│   └── platform/
+│   └── marketing/
+│   └── auth/
+│   └── app/
 ├── tailwind.config.ts
 ```
 

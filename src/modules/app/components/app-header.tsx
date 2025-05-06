@@ -25,19 +25,19 @@ export const DashboardHeader = () => {
         <div className="flex-1 md:flex md:justify-center">
           <nav className="hidden md:flex items-center gap-6">
             <Link
-              href="/dashboard"
+              href="/app/dashboard"
               className="text-sm font-medium text-muted-foreground hover:text-primary"
             >
               Dashboard
             </Link>
             <Link
-              href="/dashboard/history"
+              href="/app/history"
               className="text-sm font-medium text-muted-foreground hover:text-primary"
             >
               History
             </Link>
             <Link
-              href="/dashboard/settings"
+              href="/app/settings"
               className="text-sm font-medium text-muted-foreground hover:text-primary"
             >
               Settings

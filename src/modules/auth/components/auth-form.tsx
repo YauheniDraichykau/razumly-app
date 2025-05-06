@@ -52,9 +52,9 @@ export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
       if (authMode === 'signup') {
         await registerUser(values as SignUpForm);
       }
-      await loginCredentials(values.email, values.password, '/dashboard');
+      await loginCredentials(values.email, values.password, '/app/dashboard');
 
-      router.push('/dashboard');
+      router.push('/app/dashboard');
     } catch (e: any) {
       toast({
         title: 'Error',

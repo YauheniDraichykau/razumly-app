@@ -17,9 +17,9 @@ import {
   CardContent,
   Button,
 } from '@core/ui';
-import { DashboardSidebar } from '@platform/components/dashboard-sidebar';
-import { DashboardHeader } from '@platform/components/dashboard-header';
-import { DocumentResult } from '@platform/components/document-result';
+import { DashboardSidebar } from '@platform/components/app-sidebar';
+import { DashboardHeader } from '@platform/components/app-header';
+import { DocumentResult } from '@platform/components/app-result';
 
 export default function Dashboard() {
   const [documentType, setDocumentType] = useState('general');

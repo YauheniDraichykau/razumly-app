@@ -13,7 +13,7 @@ export default async function AuthLoginPage({ searchParams }: Props) {
   const session = await getServerSession(authOptions);
 
   if (session) {
-    redirect('/dashboard');
+    redirect('/app/dashboard');
   }
 
   return <WelcomeBoard mode={mode} />;
