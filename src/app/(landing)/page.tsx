@@ -1,8 +1,12 @@
 import Link from 'next/link';
+import { getServerSession } from 'next-auth/next';
 import { ArrowRight, FileText, Shield, Zap } from 'lucide-react';
 import { Button, Card, CardContent } from '@core/ui';
+import { authOptions } from '../api/auth/[...nextauth]/route';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await getServerSession(authOptions);
+
   return (
     <div className="flex min-h-screen flex-col m-auto">
       <header className="sticky top-0 z-50 w-full border-b bg-white">
@@ -32,11 +36,13 @@ export default function LandingPage() {
             </Link>
           </nav>
           <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button variant="outline" className="hidden md:inline-flex">
-                Sign In
-              </Button>
-            </Link>
+            {!session && (
+              <Link href="/auth/login">
+                <Button variant="outline" className="hidden md:inline-flex">
+                  Sign In
+                </Button>
+              </Link>
+            )}
             <Link href="/dashboard">
               <Button className="bg-primary hover:bg-primary-hover">Get Started</Button>
             </Link>

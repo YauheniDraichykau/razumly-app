@@ -23,6 +23,7 @@
       "@core/*": ["./src/core/*"],
       "@platform/*": ["./src/modules/platform/*"],
       "@landing/*": ["./src/modules/landing/*"],
+      "@auth/*": ["./src/modules/auth/*"],
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

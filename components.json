@@ -14,7 +14,8 @@
   "paths": {
     "@core/*": "@/src/core/*",
     "@platform/*": "@/src/modules/platform/*",
-    "@landing/*": "@/src/modules/landing/*"
+    "@landing/*": "@/src/modules/landing/*",
+    "@auth/*": "@/src/modules/auth/*"
   },
   "iconLibrary": "lucide"
 }
