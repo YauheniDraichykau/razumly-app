@@ -40,7 +40,6 @@ export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
     register,
     handleSubmit,
     formState: { isSubmitting },
-    setError,
     reset,
   } = useForm<SignUpForm | SignInForm>({
     resolver: zodResolver(authMode === 'signup' ? signupSchema : signinSchema),
@@ -48,20 +47,29 @@ export function AuthForm({ initialAuthMode = 'signin' }: AuthFormProps) {
   });
 
   const onSubmit = async (values: FieldValues) => {
-    try {
-      if (authMode === 'signup') {
+    if (authMode === 'signup') {
+      try {
         await registerUser(values as SignUpForm);
+      } catch (e) {
+        toast({
+          title: 'Error',
+          description: 'Registration error',
+          variantStyle: 'error',
+        });
       }
-      await loginCredentials(values.email, values.password, '/app/dashboard');
+    }
 
-      router.push('/app/dashboard');
-    } catch (e: any) {
+    try {
+      await loginCredentials(values.email, values.password, '/app/dashboard');
+    } catch {
       toast({
         title: 'Error',
-        description: e.message ?? 'Authentication failed',
+        description: 'Authorization error',
         variantStyle: 'error',
       });
     }
+
+    router.push('/app/dashboard');
   };
 
   const onErrors = (errors: FieldErrors) => {

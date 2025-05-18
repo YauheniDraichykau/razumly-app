@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
   SidebarTrigger,
 } from '@core/ui';
-import { signOut } from 'next-auth/react';
+import { logout } from '@core/lib/auth';
 
 export const DashboardHeader = () => {
   return (
@@ -71,7 +71,7 @@ export const DashboardHeader = () => {
                   variant="text"
                   size="text"
                   className="w-full flex justify-start"
-                  onClick={() => signOut()}
+                  onClick={() => logout()}
                 >
                   Sign out
                 </Button>

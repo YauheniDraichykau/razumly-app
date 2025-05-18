@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
 import { FileText, Home, Settings, History, HelpCircle, LogOut } from 'lucide-react';
 import {
   Button,
@@ -14,6 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@core/ui';
+import { logout } from '@core/lib/auth';
 
 export const DashboardSidebar = () => {
   const pathname = usePathname();
@@ -72,7 +72,7 @@ export const DashboardSidebar = () => {
             <SidebarMenuButton asChild>
               <Button variant="ghost" size="icon" className="w-full justify-start">
                 <LogOut className="h-5 w-5" />
-                <span onClick={() => signOut()}>Sign Out</span>
+                <span onClick={() => logout()}>Sign Out</span>
               </Button>
             </SidebarMenuButton>
           </SidebarMenuItem>

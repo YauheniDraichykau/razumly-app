@@ -20,11 +20,15 @@ import {
 import { DashboardSidebar } from '@platform/components/app-sidebar';
 import { DashboardHeader } from '@platform/components/app-header';
 import { DocumentResult } from '@platform/components/app-result';
+import { useQuery } from '@tanstack/react-query';
+import { createDocument, getDocument } from '@core/lib/documents';
+import { useToast } from '@core/hooks/use-toast';
 
 export default function Dashboard() {
+  const { toast } = useToast();
   const [documentType, setDocumentType] = useState('general');
   const [documentText, setDocumentText] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [docId, setDocId] = useState<string | null>(null);
   const [result, setResult] = useState<null | {
     simplified: string;
     highlights: Array<{
@@ -32,87 +36,43 @@ export default function Dashboard() {
       type: 'normal' | 'caution' | 'important';
     }>;
   }>(null);
+  const { data: doc, isFetching } = useQuery({
+    queryKey: ['doc', docId],
+    queryFn: () => getDocument(docId!), // ! – we know it's not null when enabled
+    enabled: !!docId,
+    refetchInterval: ({ state }) => (state.data?.status === 'PENDING' ? 3000 : false), // poll while pending
+  });
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const isProcessing = !!docId && (!doc || doc.status === 'PENDING');
+  const resultReady = doc?.status === 'COMPLETED';
+  const failed = doc?.status === 'FAILED';
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     if (!documentText.trim()) {
-      setError('Please enter some text to simplify');
+      toast({
+        title: 'Error',
+        description: 'Please paste some text',
+        variantStyle: 'error',
+      });
       return;
     }
-
-    setIsProcessing(true);
-    setError(null);
-
-    setTimeout(() => {
-      try {
-        const mockResults: Record<string, any> = {
-          medical: {
-            simplified:
-              'Your blood pressure is a bit high. The doctor recommends eating less salt and exercising more. You should take this medicine once a day with food.',
-            highlights: [
-              { text: 'Your blood pressure is a bit high.', type: 'normal' },
-              {
-                text: 'The doctor recommends eating less salt and exercising more.',
-                type: 'caution',
-              },
-              {
-                text: 'You should take this medicine once a day with food.',
-                type: 'important',
-              },
-            ],
-          },
-          legal: {
-            simplified:
-              "This contract says you'll work for the company for 2 years. You'll be paid monthly. You can't work for competitors during this time.",
-            highlights: [
-              {
-                text: "This contract says you'll work for the company for 2 years.",
-                type: 'normal',
-              },
-              { text: "You'll be paid monthly.", type: 'normal' },
-              {
-                text: "You can't work for competitors during this time.",
-                type: 'important',
-              },
-            ],
-          },
-          financial: {
-            simplified:
-              'Your account has $5,000. Last month, you spent $1,200. You saved $300. Your biggest expense was groceries.',
-            highlights: [
-              { text: 'Your account has $5,000.', type: 'normal' },
-              { text: 'Last month, you spent $1,200.', type: 'caution' },
-              { text: 'You saved $300.', type: 'normal' },
-              { text: 'Your biggest expense was groceries.', type: 'normal' },
-            ],
-          },
-          general: {
-            simplified:
-              'This document explains how to set up your new device. First, charge it for 2 hours. Then, turn it on and follow the on-screen instructions.',
-            highlights: [
-              {
-                text: 'This document explains how to set up your new device.',
-                type: 'normal',
-              },
-              { text: 'First, charge it for 2 hours.', type: 'important' },
-              {
-                text: 'Then, turn it on and follow the on-screen instructions.',
-                type: 'normal',
-              },
-            ],
-          },
-        };
-
-        setResult(mockResults[documentType] || mockResults.general);
-        setIsProcessing(false);
-      } catch (err) {
-        setError('Something went wrong. Please try again.');
-        setIsProcessing(false);
-      }
-    }, 1500);
-  };
+    try {
+      const created = await createDocument({
+        type: documentType.toUpperCase(),
+        text: documentText,
+        // TODO: if file – call /documents/upload first and put file meta here
+      });
+      setDocId(created.id); // triggers polling
+    } catch (err: any) {
+      toast({
+        title: 'Error',
+        description: 'Upload failed',
+        variantStyle: 'error',
+      });
+    }
+  }
 
   const handleReset = () => {
     setDocumentText('');
@@ -138,7 +98,7 @@ export default function Dashboard() {
               <TabsContent value="simplify">
                 <Card>
                   <CardContent className="p-6">
-                    {!result ? (
+                    {!resultReady && (
                       <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
                           <label htmlFor="document-type" className="text-sm font-medium">
@@ -151,8 +111,8 @@ export default function Dashboard() {
                             <SelectContent>
                               <SelectItem value="medical">Medical</SelectItem>
                               <SelectItem value="legal">Legal</SelectItem>
-                              <SelectItem value="financial">Financial</SelectItem>
-                              <SelectItem value="general">General</SelectItem>
+                              {/* <SelectItem value="financial">Financial</SelectItem> */}
+                              {/* <SelectItem value="general">General</SelectItem> */}
                             </SelectContent>
                           </Select>
                         </div>
@@ -193,9 +153,18 @@ export default function Dashboard() {
                             Clear
                           </Button>
                         </div>
+                        {failed && (
+                          <p className="text-destructive">
+                            Sorry, LLM failed: {doc?.error ?? 'Unknown error'}
+                          </p>
+                        )}
                       </form>
-                    ) : (
-                      <DocumentResult result={result} onReset={handleReset} />
+                    )}
+                    {resultReady && doc?.simplified && (
+                      <DocumentResult
+                        result={{ simplified: doc.simplified, highlights: [] }} // ← parse highlights later
+                        onReset={handleReset}
+                      />
                     )}
                   </CardContent>
                 </Card>

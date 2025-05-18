@@ -2,13 +2,12 @@ import NextAuth, { NextAuthOptions, Session } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import Google from 'next-auth/providers/google';
 import { JWT } from 'next-auth/jwt';
+import { httpService } from '@core/lib/http';
 
 type SessionFn = {
   session: Session;
   token: JWT;
 };
-
-const api = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -24,20 +23,11 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(creds) {
-        const r = await fetch(`${api}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            email: creds?.email || '',
-            password: creds?.password || '',
-          }),
-        });
+        if ('accessToken' in creds!) {
+          return { id: creds?.email || '', accessToken: creds.accessToken };
+        }
 
-        if (!r.ok) return null;
-        const { accessToken } = (await r.json()) as { accessToken: string };
-
-        return { id: creds?.email || '', accessToken };
+        return null;
       },
     }),
   ],
@@ -53,28 +43,25 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
-      const r = await fetch(`${api}/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ idToken: account.id_token }),
-      });
+      try {
+        const response = await httpService.post('/auth/google', { idToken: account.id_token });
 
-      if (!r.ok) {
+        console.log(response.headers);
+
+        const { accessToken } = response.data as { accessToken: string };
+        (account as typeof account & { backendAccess?: string }).backendAccess = accessToken;
+
+        return true;
+      } catch {
         return false;
       }
-
-      const { accessToken } = (await r.json()) as { accessToken: string };
-      (account as typeof account & { backendAccess?: string }).backendAccess = accessToken;
-
-      return true;
     },
     async jwt({ token, account, user }) {
       if (account && 'backendAccess' in account) {
-        token.accessToken = (account as any).backendAccess;
+        token.accessToken = (account as { backendAccess?: string }).backendAccess;
       }
       if (user && 'accessToken' in user) {
-        token.accessToken = (user as any).accessToken;
+        token.accessToken = (user as { accessToken?: string }).accessToken;
       }
       return token;
     },
